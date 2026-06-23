@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Оформление заказа</title>
+</head>
+<body>
+    <h1>Оформление заказа</h1>
+    <p><a href="/cart/">← Вернуться в корзину</a></p>
+
+    {% if messages %}
+    <div>
+        {% for message in messages %}
+        <p>{{ message }}</p>
+        {% endfor %}
+    </div>
+    {% endif %}
+
+    <h2>Ваш заказ</h2>
+    <table border="1" cellpadding="10">
+        <tr>
+            <th>Товар</th>
+            <th>Количество</th>
+            <th>Цена</th>
+            <th>Стоимость</th>
+        </tr>
+        {% for item in cart_items %}
+        <tr>
+            <td>{{ item.product.name }}</td>
+            <td>{{ item.quantity }}</td>
+            <td>{{ item.product.price }} руб.</td>
+            <td>{{ item.item_cost }} руб.</td>
+        </tr>
+        {% endfor %}
+        <tr>
+            <td colspan="3" style="text-align: right;"><strong>Итого:</strong></td>
+            <td><strong>{{ total_cost }} руб.</strong></td>
+        </tr>
+    </table>
+
+    <h2>Данные для доставки</h2>
+    <form method="post">
+        {% csrf_token %}
+        <p>
+            <label>Адрес доставки:<br>
+                <input type="text" name="address" required style="width: 300px;">
+            </label>
+        </p>
+        <p>
+            <label>Телефон:<br>
+                <input type="text" name="phone" required>
+            </label>
+        </p>
+        <p>
+            <label>Email для чека:<br>
+                <input type="email" name="email" value="{{ user.email }}" required>
+            </label>
+        </p>
+        <button type="submit">Подтвердить заказ</button>
+    </form>
+</body>
+</html>

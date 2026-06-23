@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Каталог товаров</title>
+</head>
+<body>
+    <h1>Каталог товаров</h1>
+    <p><a href="/">Главная</a> | <a href="/cart/">Корзина</a></p>
+    <form method="get">
+        <label>Категория:
+            <select name="category">
+                <option value="">Все категории</option>
+                {% for category in categories %}
+                <option value="{{ category.id }}">{{ category.name }}</option>
+                {% endfor %}
+            </select>
+        </label>
+        <label>Производитель:
+            <select name="manufacturer">
+                <option value="">Все производители</option>
+                {% for manufacturer in manufacturers %}
+                <option value="{{ manufacturer.id }}">{{ manufacturer.name }}</option>
+                {% endfor %}
+            </select>
+        </label>
+        <label>Поиск:
+            <input type="text" name="search" value="{{ search_query|default:'' }}" placeholder="Поиск...">
+        </label>
+        <button type="submit">Найти</button>
+    </form>
+    <hr>
+    {% for product in products %}
+    <div id="product-{{ product.id }}" style="border: 1px solid #ccc; padding: 10px; margin: 10px 0;">
+        <h3>{{ product.name }}</h3>
+        <p><strong>Категория:</strong> {{ product.category.name }}</p>
+        <p><strong>Производитель:</strong> {{ product.manufacturer.name }}</p>
+        <p><strong>Цена:</strong> {{ product.price }} руб.</p>
+        <p><strong>На складе:</strong> {{ product.stock_quantity }} шт.</p>
+        <a href="{% url 'product_detail' pk=product.id %}">Подробнее</a>
+        {% if user.is_authenticated %}
+        <form action="{% url 'add_to_cart' product_id=product.id %}" method="post" style="display: inline;">
+            {% csrf_token %}
+            <button type="submit">Добавить в корзину</button>
+        </form>
+        {% else %}
+        <p><a href="/admin/login/">Войдите</a>, чтобы добавить в корзину</p>
+        {% endif %}
+    </div>
+    {% empty %}
+    <p>Товары не найдены</p>
+    {% endfor %}
+</body>
+</html>

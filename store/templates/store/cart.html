@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Корзина</title>
+</head>
+<body>
+    <h1>Ваша корзина</h1>
+    <p><a href="/catalog/">Продолжить покупки</a> | <a href="/">Главная</a></p>
+
+    {% if messages %}
+    <div>
+        {% for message in messages %}
+        <p>{{ message }}</p>
+        {% endfor %}
+    </div>
+    {% endif %}
+
+    {% if cart_items %}
+    <table border="1" cellpadding="10">
+        <tr>
+            <th>Товар</th>
+            <th>Цена</th>
+            <th>Количество</th>
+            <th>Стоимость</th>
+            <th>Действия</th>
+        </tr>
+        {% for item in cart_items %}
+        <tr>
+            <td>{{ item.product.name }}</td>
+            <td>{{ item.product.price }} руб.</td>
+            <td>
+                <form action="{% url 'update_cart_item' item_id=item.id %}" method="post" style="display: inline;">
+                    {% csrf_token %}
+                    <input type="number" name="quantity" value="{{ item.quantity }}" min="0" max="{{ item.product.stock_quantity }}" style="width: 60px;">
+                    <button type="submit">Обновить</button>
+                </form>
+            </td>
+            <td>{{ item.item_cost }} руб.</td>
+            <td>
+                <form action="{% url 'remove_from_cart' item_id=item.id %}" method="post" style="display: inline;">
+                    {% csrf_token %}
+                    <button type="submit">Удалить</button>
+                </form>
+            </td>
+        </tr>
+        {% endfor %}
+        <tr>
+            <td colspan="3" style="text-align: right;"><strong>Общая стоимость:</strong></td>
+            <td colspan="2"><strong>{{ total_cost }} руб.</strong></td>
+        </tr>
+    </table>
+    <p><a href="/checkout/" style="background:#d63384;color:white;padding:10px 20px;text-decoration:none;border-radius:5px;">Оформить заказ</a></p>
+    {% else %}
+    <p>Ваша корзина пуста</p>
+    <p><a href="/catalog/">Перейти к покупкам</a></p>
+    {% endif %}
+</body>
+</html>

@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Главная</title>
+</head>
+<body>
+    <h1>Добро пожаловать в магазин!</h1>
+    
+    {% if user.is_authenticated %}
+    <p>Привет, <strong>{{ user.username }}</strong>!</p>
+    <form action="/accounts/logout/" method="post" style="display:inline;">
+        {% csrf_token %}
+        <button type="submit" style="background:none;border:none;color:#00f;text-decoration:underline;cursor:pointer;font-size:inherit;">Выйти</button>
+    </form>
+    | <a href="/cart/">Корзина</a>
+    {% else %}
+    <p><a href="/accounts/login/">Войти</a> | <a href="/register/">Регистрация</a></p>
+    {% endif %}
+    
+    <ul>
+        <li><a href="/about/">Об авторе</a></li>
+        <li><a href="/store-info/">О магазине</a></li>
+        <li><a href="/catalog/">Каталог товаров</a></li>
+        <li><a href="/cart/">Корзина</a></li>
+    </ul>
+</body>
+</html>
