@@ -71,3 +71,35 @@ class CartSerializer(serializers.ModelSerializer):
         model = Cart
         fields = ['id', 'user', 'created_at', 'items', 'total_cost']
         read_only_fields = ['user', 'created_at']
+
+from django.contrib.auth.models import User
+from .models import Profile
+
+class ProfileSerializer(serializers.ModelSerializer):
+    username = serializers.CharField(source='user.username', read_only=True)
+    email = serializers.EmailField(source='user.email')
+
+    class Meta:
+        model = Profile
+        fields = ['id', 'username', 'email', 'full_name', 'phone', 'address', 'delivery_city', 'postal_code', 'favorite_category', 'newsletter', 'role', 'avatar']
+        read_only_fields = ['username', 'role']
+
+class UserRegisterSerializer(serializers.ModelSerializer):
+    password = serializers.CharField(write_only=True, min_length=6)
+    full_name = serializers.CharField(required=False)
+    phone = serializers.CharField(required=False)
+
+    class Meta:
+        model = User
+        fields = ['username', 'email', 'password', 'full_name', 'phone']
+
+    def create(self, validated_data):
+        full_name = validated_data.pop('full_name', '')
+        phone = validated_data.pop('phone', '')
+        user = User.objects.create_user(**validated_data)
+        Profile.objects.create(user=user, full_name=full_name, phone=phone)
+        return user
+
+class UserLoginSerializer(serializers.Serializer):
+    username = serializers.CharField()
+    password = serializers.CharField()

@@ -1,0 +1,197 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Каталог товаров{% endblock %}
+
+{% block content %}
+<style>
+.catalog-card {
+    height: 100%;
+    border: none !important;
+    box-shadow: 0 2px 10px rgba(255, 107, 157, 0.15) !important;
+    border-radius: 15px !important;
+    display: flex !important;
+    flex-direction: column !important;
+}
+.catalog-card .card-img-placeholder {
+    height: 200px;
+    background-color: #f8f9fa !important;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 15px 15px 0 0;
+}
+.catalog-card .card-body {
+    display: flex !important;
+    flex-direction: column !important;
+    flex-grow: 1 !important;
+    padding: 1.25rem !important;
+}
+.catalog-card .card-title {
+    color: #c9184a !important;
+    font-weight: 600 !important;
+    min-height: 48px !important;
+    overflow: hidden;
+}
+.catalog-card .card-desc {
+    min-height: 40px !important;
+    color: #6c757d !important;
+    font-size: 0.875rem !important;
+}
+.catalog-card .card-price {
+    color: #c9184a !important;
+    font-weight: bold !important;
+    font-size: 1.4rem !important;
+    margin-top: auto !important;
+    margin-bottom: 1rem !important;
+}
+.catalog-card .card-buttons {
+    margin-top: auto !important;
+}
+.catalog-card .btn-detail {
+    border-radius: 25px !important;
+    border-color: #ff6b9d !important;
+    color: #ff6b9d !important;
+    background: white !important;
+    width: 100% !important;
+    margin-bottom: 0.5rem !important;
+}
+.catalog-card .btn-detail:hover {
+    background: #ff6b9d !important;
+    color: white !important;
+}
+.catalog-card .btn-cart {
+    border-radius: 25px !important;
+    background-color: #ff6b9d !important;
+    border-color: #ff6b9d !important;
+    color: white !important;
+    width: 100% !important;
+}
+.catalog-card .btn-cart:hover {
+    background-color: #c9184a !important;
+    border-color: #c9184a !important;
+}
+.page-link-pink {
+    color: #ff6b9d !important;
+    border: 1px solid #ffc2d1 !important;
+    border-radius: 10px !important;
+    margin: 0 5px !important;
+    padding: 8px 16px !important;
+    background: white !important;
+}
+.page-link-pink:hover {
+    background: #ffc2d1 !important;
+    color: #c9184a !important;
+}
+.page-active-pink {
+    background: #ff6b9d !important;
+    border: 1px solid #ff6b9d !important;
+    border-radius: 10px !important;
+    margin: 0 5px !important;
+    padding: 8px 16px !important;
+    color: white !important;
+}
+</style>
+
+<h1 class="mb-4" style="color: #c9184a;"><i class="bi bi-grid"></i> Каталог товаров</h1>
+
+<div class="row">
+    <div class="col-md-3 mb-4">
+        <div class="filter-sidebar">
+            <h5 class="mb-3" style="color: #c9184a;"><i class="bi bi-funnel"></i> Фильтры</h5>
+            <form method="get" action="">
+                <div class="mb-3">
+                    <label class="form-label fw-bold">Категория</label>
+                    <select name="category" class="form-select">
+                        <option value="">Все категории</option>
+                        {% for category in categories %}
+                        <option value="{{ category.id }}" {% if request.GET.category == category.id|stringformat:"s" %}selected{% endif %}>{{ category.name }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div class="mb-3">
+                    <label class="form-label fw-bold">Производитель</label>
+                    <select name="manufacturer" class="form-select">
+                        <option value="">Все производители</option>
+                        {% for manufacturer in manufacturers %}
+                        <option value="{{ manufacturer.id }}" {% if request.GET.manufacturer == manufacturer.id|stringformat:"s" %}selected{% endif %}>{{ manufacturer.name }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div class="mb-3">
+                    <label class="form-label fw-bold">Поиск</label>
+                    <input type="text" name="search" class="form-control" placeholder="Название товара..." value="{{ request.GET.search }}">
+                </div>
+                <button type="submit" class="btn btn-primary w-100" style="background: #ff6b9d; border-color: #ff6b9d; border-radius: 25px;">
+                    <i class="bi bi-search"></i> Применить
+                </button>
+            </form>
+            {% if request.GET %}
+            <a href="/catalog/" class="btn btn-outline-secondary w-100 mt-2" style="border-radius: 25px;">
+                <i class="bi bi-x-circle"></i> Сбросить
+            </a>
+            {% endif %}
+        </div>
+    </div>
+    <div class="col-md-9">
+        {% if products %}
+        <p class="text-muted mb-3">Найдено товаров: {{ products.paginator.count }}</p>
+        <div class="row">
+            {% for product in products %}
+            <div class="col-sm-6 col-md-6 col-lg-4 mb-4">
+                <div class="card catalog-card">
+                    {% if product.photo %}
+                        <img src="{{ product.photo.url }}" class="card-img-top" alt="{{ product.name }}" style="height: 200px; object-fit: cover; border-radius: 15px 15px 0 0;">
+                    {% else %}
+                        <div class="card-img-placeholder">
+                            <i class="bi bi-image" style="font-size: 3rem; color: #ff6b9d;"></i>
+                        </div>
+                    {% endif %}
+                    <div class="card-body">
+                        <h5 class="card-title">{{ product.name }}</h5>
+                        <p class="card-desc">{{ product.description|truncatechars:80 }}</p>
+                        <p class="card-price">{{ product.price }} руб.</p>
+                        <div class="card-buttons">
+                            <a href="{% url 'product_detail' pk=product.id %}" class="btn btn-detail">
+                                <i class="bi bi-eye"></i> Подробнее
+                            </a>
+                            <button onclick="addToCart({{ product.id }})" class="btn btn-cart">
+                                <i class="bi bi-cart-plus"></i> В корзину
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+        
+        {% if products.has_other_pages %}
+        <nav class="mt-4">
+            <div class="d-flex justify-content-center align-items-center gap-2">
+                {% if products.has_previous %}
+                <a href="?page={{ products.previous_page_number }}{% if request.GET.category %}&category={{ request.GET.category }}{% endif %}{% if request.GET.manufacturer %}&manufacturer={{ request.GET.manufacturer }}{% endif %}{% if request.GET.search %}&search={{ request.GET.search }}{% endif %}" class="page-link-pink">
+                    <i class="bi bi-chevron-left"></i> Назад
+                </a>
+                {% endif %}
+                
+                <span class="page-active-pink">
+                    {{ products.number }} / {{ products.paginator.num_pages }}
+                </span>
+                
+                {% if products.has_next %}
+                <a href="?page={{ products.next_page_number }}{% if request.GET.category %}&category={{ request.GET.category }}{% endif %}{% if request.GET.manufacturer %}&manufacturer={{ request.GET.manufacturer }}{% endif %}{% if request.GET.search %}&search={{ request.GET.search }}{% endif %}" class="page-link-pink">
+                    Вперёд <i class="bi bi-chevron-right"></i>
+                </a>
+                {% endif %}
+            </div>
+        </nav>
+        {% endif %}
+        
+        {% else %}
+        <div class="alert alert-info">
+            <i class="bi bi-info-circle"></i> Товары не найдены
+        </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

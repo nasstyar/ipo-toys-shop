@@ -1,61 +1,138 @@
-<!DOCTYPE html>
-<html>
-<head>
-    <title>Оформление заказа</title>
-</head>
-<body>
-    <h1>Оформление заказа</h1>
-    <p><a href="/cart/">← Вернуться в корзину</a></p>
+{% extends 'base.html' %}
+{% load static %}
 
-    {% if messages %}
-    <div>
-        {% for message in messages %}
-        <p>{{ message }}</p>
-        {% endfor %}
+{% block title %}Оформление заказа - Магазин игрушек{% endblock %}
+
+{% block content %}
+<style>
+.checkout-container {
+    max-width: 800px;
+    margin: 0 auto;
+}
+.checkout-card {
+    border: none;
+    box-shadow: 0 2px 15px rgba(255, 107, 157, 0.15);
+    border-radius: 15px;
+    padding: 2rem;
+    background: white;
+}
+.checkout-title {
+    color: #c9184a;
+    font-weight: bold;
+    margin-bottom: 1.5rem;
+}
+.form-control, .form-select {
+    border: 2px solid #ffc2d1;
+    border-radius: 10px;
+    padding: 0.75rem;
+    transition: border-color 0.3s;
+}
+.form-control:focus, .form-select:focus {
+    border-color: #ff6b9d;
+    box-shadow: 0 0 0 0.2rem rgba(255, 107, 157, 0.25);
+}
+.form-label {
+    color: #c9184a;
+    font-weight: 600;
+    margin-bottom: 0.5rem;
+}
+.order-summary {
+    background: linear-gradient(135deg, #fff0f3 0%, #ffc2d1 100%);
+    border-radius: 15px;
+    padding: 1.5rem;
+    margin-top: 1.5rem;
+}
+.order-item {
+    display: flex;
+    justify-content: space-between;
+    padding: 0.5rem 0;
+    border-bottom: 1px solid #ffc2d1;
+}
+.order-item:last-child {
+    border-bottom: none;
+}
+.btn-submit {
+    border-radius: 25px;
+    background: linear-gradient(135deg, #ff6b9d 0%, #c9184a 100%);
+    border: none;
+    color: white;
+    padding: 15px 40px;
+    font-size: 1.1rem;
+    font-weight: 600;
+    transition: all 0.3s;
+    width: 100%;
+    margin-top: 1.5rem;
+}
+.btn-submit:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 5px 20px rgba(255, 107, 157, 0.4);
+    color: white;
+}
+</style>
+
+<div class="checkout-container">
+    <h1 class="mb-4" style="color: #c9184a;">
+        <i class="bi bi-credit-card"></i> Оформление заказа
+    </h1>
+    
+    <div class="checkout-card">
+        <h3 class="checkout-title">
+            <i class="bi bi-person"></i> Контактные данные
+        </h3>
+        
+        <form method="post">
+            {% csrf_token %}
+            
+            <div class="mb-3">
+                <label class="form-label">
+                    <i class="bi bi-envelope"></i> Email
+                </label>
+                <input type="email" name="email" class="form-control" 
+                       value="{{ user.email }}" required
+                       placeholder="your@email.com">
+            </div>
+            
+            <div class="mb-3">
+                <label class="form-label">
+                    <i class="bi bi-telephone"></i> Телефон
+                </label>
+                <input type="tel" name="phone" class="form-control" required
+                       placeholder="+7 (999) 123-45-67">
+            </div>
+            
+            <div class="mb-3">
+                <label class="form-label">
+                    <i class="bi bi-geo-alt"></i> Адрес доставки
+                </label>
+                <textarea name="address" class="form-control" rows="3" required
+                          placeholder="Город, улица, дом, квартира"></textarea>
+            </div>
+            
+            <!-- Список товаров -->
+            <div class="order-summary">
+                <h4 class="mb-3" style="color: #c9184a;">
+                    <i class="bi bi-bag"></i> Ваш заказ
+                </h4>
+                
+                {% for item in cart_items %}
+                <div class="order-item">
+                    <span>{{ item.product.name }} × {{ item.quantity }}</span>
+                    <span class="fw-bold">{{ item.item_cost }} руб.</span>
+                </div>
+                {% endfor %}
+                
+                <hr style="border-color: #ff6b9d;">
+                
+                <div class="d-flex justify-content-between mt-3">
+                    <span class="fw-bold" style="color: #c9184a; font-size: 1.2rem;">Итого:</span>
+                    <span class="fw-bold" style="color: #c9184a; font-size: 1.2rem;">{{ total_cost }} руб.</span>
+                </div>
+            </div>
+            
+            <button type="submit" class="btn btn-submit">
+                <i class="bi bi-check-circle"></i> Подтвердить заказ
+            </button>
+        </form>
     </div>
-    {% endif %}
-
-    <h2>Ваш заказ</h2>
-    <table border="1" cellpadding="10">
-        <tr>
-            <th>Товар</th>
-            <th>Количество</th>
-            <th>Цена</th>
-            <th>Стоимость</th>
-        </tr>
-        {% for item in cart_items %}
-        <tr>
-            <td>{{ item.product.name }}</td>
-            <td>{{ item.quantity }}</td>
-            <td>{{ item.product.price }} руб.</td>
-            <td>{{ item.item_cost }} руб.</td>
-        </tr>
-        {% endfor %}
-        <tr>
-            <td colspan="3" style="text-align: right;"><strong>Итого:</strong></td>
-            <td><strong>{{ total_cost }} руб.</strong></td>
-        </tr>
-    </table>
-
-    <h2>Данные для доставки</h2>
-    <form method="post">
-        {% csrf_token %}
-        <p>
-            <label>Адрес доставки:<br>
-                <input type="text" name="address" required style="width: 300px;">
-            </label>
-        </p>
-        <p>
-            <label>Телефон:<br>
-                <input type="text" name="phone" required>
-            </label>
-        </p>
-        <p>
-            <label>Email для чека:<br>
-                <input type="email" name="email" value="{{ user.email }}" required>
-            </label>
-        </p>
-        <button type="submit">Подтвердить заказ</button>
-    </form>
-</body>
-</html>
+</div>
+{% endblock %}

@@ -9,14 +9,21 @@ from .models import Product, Category, Manufacturer, Cart, CartItem
 
 
 def home(request):
-    return render(request, 'store/home.html')
+    from .models import Product, Category
+    popular_products = Product.objects.all()[:6]
+    categories = Category.objects.all()
+    context = {
+        'popular_products': popular_products,
+        'categories': categories,
+    }
+    return render(request, 'store/home.html', context)
 
 
 def about_author(request):
     return HttpResponse("""
 <h1>Об авторе</h1>
 <p>Лабораторную работу выполнила: Козлова Анастасия</p>
-<p>Группа: 87ПК</p>
+<p>Группа: 87ТП</p>
 <p>Учебное заведение: МГКЦТ</p>
 """)
 
@@ -30,27 +37,37 @@ def about_store(request):
 
 
 def product_list(request):
-    products = Product.objects.all()
+    products = Product.objects.all().order_by('id')
     categories = Category.objects.all()
     manufacturers = Manufacturer.objects.all()
+    
+    # Фильтры
     category_id = request.GET.get('category')
     if category_id:
         products = products.filter(category_id=category_id)
+    
     manufacturer_id = request.GET.get('manufacturer')
     if manufacturer_id:
         products = products.filter(manufacturer_id=manufacturer_id)
+    
     search_query = request.GET.get('search')
     if search_query:
         products = products.filter(
             Q(name__icontains=search_query) | Q(description__icontains=search_query)
         )
+    
+    # Пагинация - 9 товаров на странице
+    from django.core.paginator import Paginator
+    paginator = Paginator(products, 9)
+    page_number = request.GET.get('page')
+    products_page = paginator.get_page(page_number)
+    
     context = {
-        'products': products,
+        'products': products_page,
         'categories': categories,
         'manufacturers': manufacturers,
-        'search_query': search_query,
     }
-    return render(request, 'store/product_list.html', context)
+    return render(request, 'store/catalog.html', context)
 
 
 def product_detail(request, pk):
@@ -73,7 +90,7 @@ def add_to_cart(request, product_id):
             messages.warning(request, f'Достигнуто максимальное количество ({product.stock_quantity} шт.)')
         cart_item.save()
     messages.success(request, f'Товар "{product.name}" добавлен в корзину!')
-    return redirect(f'/catalog/?product_id={product_id}#product-{product_id}')
+    return redirect('home')
 
 
 @login_required
@@ -127,7 +144,7 @@ def register(request):
         if form.is_valid():
             user = form.save()
             login(request, user)
-            return redirect(f'/catalog/?product_id={product_id}#product-{product_id}')
+            return redirect('home')
     else:
         form = UserCreationForm()
     return render(request, 'registration/register.html', {'form': form})
@@ -220,7 +237,7 @@ def checkout(request):
         cart_items.delete()
 
         messages.success(request, f'Заказ #{order.id} успешно оформлен! Чек отправлен на {email}')
-        return redirect(f'/catalog/?product_id={product_id}#product-{product_id}')
+        return redirect('home')
 
     return render(request, 'store/checkout.html', {
         'cart_items': cart_items,
@@ -244,6 +261,11 @@ class CategoryViewSet(viewsets.ModelViewSet):
     serializer_class = CategorySerializer
     permission_classes = [permissions.IsAuthenticatedOrReadOnly]
 
+    def get_permissions(self):
+        if self.action in ['create', 'update', 'partial_update', 'destroy']:
+            return [permissions.IsAdminUser()]
+        return [permissions.AllowAny()]
+
 
 class ManufacturerViewSet(viewsets.ModelViewSet):
     """API для работы с производителями"""
@@ -254,7 +276,7 @@ class ManufacturerViewSet(viewsets.ModelViewSet):
 
 class ProductViewSet(viewsets.ModelViewSet):
     """API для работы с товарами с фильтрацией"""
-    queryset = Product.objects.all()
+    queryset = Product.objects.all().order_by("id")
     serializer_class = ProductSerializer
     permission_classes = [permissions.IsAuthenticatedOrReadOnly]
 
@@ -301,3 +323,74 @@ class CartItemViewSet(viewsets.ModelViewSet):
     def perform_create(self, serializer):
         cart, created = Cart.objects.get_or_create(user=self.request.user)
         serializer.save(cart=cart)
+
+from rest_framework.views import APIView
+from rest_framework.permissions import IsAuthenticated, IsAdminUser, AllowAny
+from rest_framework.response import Response
+from rest_framework import status
+from django.contrib.auth import authenticate, login, logout
+from .serializers import ProfileSerializer, UserRegisterSerializer, UserLoginSerializer
+
+class MeView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def get(self, request):
+        serializer = ProfileSerializer(request.user.profile)
+        return Response(serializer.data)
+
+    def patch(self, request):
+        serializer = ProfileSerializer(request.user.profile, data=request.data, partial=True)
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+class RegisterView(APIView):
+    permission_classes = [AllowAny]
+
+    def post(self, request):
+        serializer = UserRegisterSerializer(data=request.data)
+        if serializer.is_valid():
+            user = serializer.save()
+            login(request, user)
+            return Response({
+                'id': user.id,
+                'username': user.username,
+                'message': 'Регистрация успешна'
+            }, status=status.HTTP_201_CREATED)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+class LoginView(APIView):
+    permission_classes = [AllowAny]
+
+    def post(self, request):
+        serializer = UserLoginSerializer(data=request.data)
+        if serializer.is_valid():
+            user = authenticate(
+                request,
+                username=serializer.validated_data['username'],
+                password=serializer.validated_data['password']
+            )
+            if user:
+                login(request, user)
+                return Response({
+                    'id': user.id,
+                    'username': user.username,
+                    'message': 'Вход выполнен'
+                })
+            return Response({'error': 'Неверные данные'}, status=status.HTTP_401_UNAUTHORIZED)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+class LogoutView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def post(self, request):
+        logout(request)
+        return Response({'message': 'Выход выполнен'})
+
+def profile_view(request):
+    return render(request, 'store/profile.html')
+
+
+def settings_view(request):
+    return render(request, 'store/settings.html')

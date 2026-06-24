@@ -1,26 +1,176 @@
-<!DOCTYPE html>
-<html>
-<head>
-    <title>{{ product.name }}</title>
-</head>
-<body>
-    <p><a href="/catalog/">← Назад</a> | <a href="/">Главная</a> | <a href="/cart/">Корзина</a></p>
-    <h1>{{ product.name }}</h1>
-    {% if product.photo %}
-    <img src="{{ product.photo.url }}" alt="{{ product.name }}" style="max-width: 400px;">
-    {% endif %}
-    <p><strong>Категория:</strong> {{ product.category.name }}</p>
-    <p><strong>Производитель:</strong> {{ product.manufacturer.name }}</p>
-    <p><strong>Цена:</strong> {{ product.price }} руб.</p>
-    <p><strong>На складе:</strong> {{ product.stock_quantity }} шт.</p>
-    <p><strong>Описание:</strong> {{ product.description }}</p>
-    {% if user.is_authenticated %}
-    <form action="{% url 'add_to_cart' product_id=product.id %}" method="post">
-        {% csrf_token %}
-        <button type="submit">Добавить в корзину</button>
-    </form>
-    {% else %}
-    <p><a href="/admin/login/">Войдите</a>, чтобы добавить в корзину</p>
-    {% endif %}
-</body>
-</html>
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}{{ product.name }} - Магазин игрушек{% endblock %}
+
+{% block content %}
+<style>
+.product-image {
+    border-radius: 15px;
+    box-shadow: 0 5px 20px rgba(255, 107, 157, 0.2);
+    max-height: 500px;
+    object-fit: contain;
+    width: 100%;
+    background: linear-gradient(135deg, #fff0f3 0%, #ffe5ec 100%);
+}
+.product-image-placeholder {
+    height: 500px;
+    border-radius: 15px;
+    box-shadow: 0 5px 20px rgba(255, 107, 157, 0.2);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: linear-gradient(135deg, #fff0f3 0%, #ffe5ec 100%);
+}
+.product-title {
+    color: #c9184a;
+    font-weight: bold;
+    font-size: 2rem;
+    margin-bottom: 1rem;
+}
+.product-price-box {
+    background: linear-gradient(135deg, #fff0f3 0%, #ffc2d1 100%);
+    border-radius: 15px;
+    padding: 1.5rem;
+    margin: 1.5rem 0;
+}
+.product-price {
+    color: #c9184a;
+    font-weight: bold;
+    font-size: 2.5rem;
+    margin: 0;
+}
+.btn-add-cart {
+    border-radius: 25px;
+    background-color: #ff6b9d;
+    border-color: #ff6b9d;
+    color: white;
+    padding: 12px 30px;
+    font-size: 1.1rem;
+    font-weight: 500;
+    transition: all 0.3s;
+}
+.btn-add-cart:hover {
+    background-color: #c9184a;
+    border-color: #c9184a;
+    transform: translateY(-2px);
+    box-shadow: 0 5px 15px rgba(255, 107, 157, 0.4);
+}
+.btn-add-cart:disabled {
+    background-color: #ccc;
+    border-color: #ccc;
+    cursor: not-allowed;
+}
+.badge-pink {
+    background-color: #ffc2d1;
+    color: #c9184a;
+    padding: 8px 15px;
+    border-radius: 20px;
+    font-size: 0.9rem;
+    margin-right: 10px;
+}
+.info-box {
+    background: #fff0f3;
+    border-radius: 10px;
+    padding: 1rem;
+    margin-top: 1rem;
+}
+.info-box h6 {
+    color: #c9184a;
+    font-weight: 600;
+}
+</style>
+
+<!-- Хлебные крошки -->
+<nav aria-label="breadcrumb" class="mb-4">
+    <ol class="breadcrumb">
+        <li class="breadcrumb-item"><a href="/" style="color: #ff6b9d;"><i class="bi bi-house"></i> Главная</a></li>
+        <li class="breadcrumb-item"><a href="/catalog/" style="color: #ff6b9d;">Каталог</a></li>
+        <li class="breadcrumb-item active" style="color: #6c757d;">{{ product.name }}</li>
+    </ol>
+</nav>
+
+<div class="row">
+    <!-- Фото товара -->
+    <div class="col-md-6 mb-4">
+        {% if product.photo %}
+            <img src="{{ product.photo.url }}" class="product-image" alt="{{ product.name }}">
+        {% else %}
+            <div class="product-image-placeholder">
+                <i class="bi bi-image" style="font-size: 8rem; color: #ff6b9d;"></i>
+            </div>
+        {% endif %}
+    </div>
+    
+    <!-- Информация о товаре -->
+    <div class="col-md-6">
+        <h1 class="product-title">{{ product.name }}</h1>
+        
+        <!-- Категория и производитель -->
+        <div class="mb-3">
+            <span class="badge-pink">
+                <i class="bi bi-tags"></i> {{ product.category.name }}
+            </span>
+            <span class="badge-pink">
+                <i class="bi bi-building"></i> {{ product.manufacturer.name }}
+            </span>
+        </div>
+        
+        <!-- Описание -->
+        <div class="mb-3">
+            <h5 style="color: #c9184a; font-weight: 600;"><i class="bi bi-info-circle"></i> Описание</h5>
+            <p class="text-muted">{{ product.description|default:"Описание отсутствует" }}</p>
+        </div>
+        
+        <!-- Цена -->
+        <div class="product-price-box">
+            <p class="product-price">
+                <i class="bi bi-cash-coin"></i> {{ product.price }} руб.
+            </p>
+        </div>
+        
+        <!-- Наличие -->
+        <div class="mb-4">
+            <h5 style="color: #c9184a; font-weight: 600;"><i class="bi bi-box-seam"></i> Наличие</h5>
+            {% if product.stock_quantity > 0 %}
+                <span class="badge bg-success" style="font-size: 1rem; padding: 10px 20px;">
+                    <i class="bi bi-check-circle"></i> В наличии: {{ product.stock_quantity }} шт.
+                </span>
+            {% else %}
+                <span class="badge bg-danger" style="font-size: 1rem; padding: 10px 20px;">
+                    <i class="bi bi-x-circle"></i> Нет в наличии
+                </span>
+            {% endif %}
+        </div>
+        
+        <!-- Кнопки -->
+        <div class="d-grid gap-2">
+            {% if product.stock_quantity > 0 %}
+                <button onclick="addToCart({{ product.id }})" class="btn btn-add-cart">
+                    <i class="bi bi-cart-plus"></i> Добавить в корзину
+                </button>
+            {% else %}
+                <button class="btn btn-add-cart" disabled>
+                    <i class="bi bi-ban"></i> Нет в наличии
+                </button>
+            {% endif %}
+            
+            <a href="/catalog/" class="btn btn-outline-secondary btn-lg" style="border-radius: 25px;">
+                <i class="bi bi-arrow-left"></i> Вернуться к каталогу
+            </a>
+        </div>
+        
+        <!-- Информация о производителе -->
+        {% if product.manufacturer.description %}
+        <div class="info-box">
+            <h6><i class="bi bi-building"></i> О производителе</h6>
+            <p class="mb-1"><strong>{{ product.manufacturer.name }}</strong></p>
+            {% if product.manufacturer.country %}
+            <p class="mb-1 text-muted"><i class="bi bi-geo-alt"></i> {{ product.manufacturer.country }}</p>
+            {% endif %}
+            <p class="mb-0 text-muted small">{{ product.manufacturer.description }}</p>
+        </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

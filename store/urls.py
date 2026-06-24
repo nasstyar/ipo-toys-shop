@@ -6,8 +6,6 @@ from . import views
 
 # Создаём роутер
 router = DefaultRouter()
-
-# Регистрируем ViewSets
 router.register(r'categories', views.CategoryViewSet, basename='category')
 router.register(r'manufacturers', views.ManufacturerViewSet, basename='manufacturer')
 router.register(r'products', views.ProductViewSet, basename='product')
@@ -19,16 +17,24 @@ urlpatterns = [
     # API маршруты
     path('api/', include(router.urls)),
     
-    # API аутентификация
+    # API авторизации
     path('api/auth/login/', obtain_auth_token, name='api_login'),
     path('api/auth/logout/', auth_views.LogoutView.as_view(), name='api_logout'),
+    path('api/me/', views.MeView.as_view(), name='api_me'),
+    path('api/register/', views.RegisterView.as_view(), name='api_register'),
+    path('api/login/', views.LoginView.as_view(), name='api_login'),
+    path('api/logout/', views.LogoutView.as_view(), name='api_logout'),
     
-    # Обычные маршруты (HTML страницы)
-    path('', views.product_list, name='catalog'),
+    # HTML страницы
+    path('', views.home, name='home'),
+    path('catalog/', views.product_list, name='catalog'),
     path('product/<int:pk>/', views.product_detail, name='product_detail'),
     path('cart/', views.cart_view, name='cart'),
     path('cart/add/<int:product_id>/', views.add_to_cart, name='add_to_cart'),
     path('cart/update/<int:item_id>/', views.update_cart_item, name='update_cart_item'),
     path('cart/remove/<int:item_id>/', views.remove_from_cart, name='remove_from_cart'),
     path('checkout/', views.checkout, name='checkout'),
+    path('register/', views.register, name='register'),
+    path('profile/', views.profile_view, name='profile'),
+    path('settings/', views.settings_view, name='settings'),
 ]

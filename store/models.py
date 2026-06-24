@@ -43,7 +43,7 @@ class Product(models.Model):
     def clean(self):
         if self.price < 0:
             raise ValidationError({'price': 'Цена не может быть отрицательной.'})
-        if self.stock_quantity < 0:
+        if self.stock_quantity is not None and self.stock_quantity < 0:
             raise ValidationError({'stock_quantity': 'Количество на складе не может быть отрицательным.'})
 
     def save(self, *args, **kwargs):
@@ -121,3 +121,40 @@ class OrderItem(models.Model):
     class Meta:
         verbose_name = "Элемент заказа"
         verbose_name_plural = "Элементы заказа"
+
+from django.db.models.signals import post_save
+from django.dispatch import receiver
+
+class Profile(models.Model):
+    ROLE_CHOICES = [
+        ('CUSTOMER', 'Покупатель'),
+        ('ADMIN', 'Администратор'),
+        ('MANAGER', 'Менеджер'),
+    ]
+    user = models.OneToOneField('auth.User', on_delete=models.CASCADE, related_name='profile')
+    full_name = models.CharField('ФИО', max_length=200, blank=True)
+    phone = models.CharField('Телефон', max_length=20, blank=True)
+    address = models.TextField('Адрес', blank=True)
+    delivery_city = models.CharField('Город доставки', max_length=100, blank=True)
+    postal_code = models.CharField('Почтовый индекс', max_length=10, blank=True)
+    favorite_category = models.ForeignKey('Category', on_delete=models.SET_NULL, null=True, blank=True, verbose_name='Любимая категория')
+    newsletter = models.BooleanField('Подписка на новости', default=False)
+    role = models.CharField('Роль', max_length=20, choices=ROLE_CHOICES, default='CUSTOMER')
+    avatar = models.ImageField('Аватар', upload_to='avatars/', blank=True, null=True)
+
+    def __str__(self):
+        return f'Профиль {self.user.username}'
+
+    class Meta:
+        verbose_name = 'Профиль'
+        verbose_name_plural = 'Профили'
+
+@receiver(post_save, sender=User)
+def create_user_profile(sender, instance, created, **kwargs):
+    if created:
+        Profile.objects.create(user=instance)
+
+@receiver(post_save, sender=User)
+def save_user_profile(sender, instance, **kwargs):
+    if hasattr(instance, 'profile'):
+        instance.profile.save()
