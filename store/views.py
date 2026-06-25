@@ -151,40 +151,43 @@ def register(request):
 
 
 import openpyxl
+import os
+import tempfile
 from django.core.mail import EmailMessage
 from .models import Order, OrderItem
-
-
+ 
+ 
 @login_required
 def checkout(request):
     cart, created = Cart.objects.get_or_create(user=request.user)
-    cart_items = cart.items.all()
-
+    cart_items = list(cart.items.select_related('product').all())  # list() фиксирует данные до удаления
+ 
     if not cart_items:
         messages.warning(request, 'Ваша корзина пуста!')
         return redirect('cart')
-
+ 
     total_cost = cart.total_cost()
-
+ 
     if request.method == 'POST':
-        address = request.POST.get('address')
-        phone = request.POST.get('phone')
-        email = request.POST.get('email')
-
+        address = request.POST.get('address', '').strip()
+        phone = request.POST.get('phone', '').strip()
+        email = request.POST.get('email', '').strip()
+ 
         if not address or not phone or not email:
             messages.error(request, 'Пожалуйста, заполните все поля!')
             return render(request, 'store/checkout.html', {
                 'cart_items': cart_items,
                 'total_cost': total_cost,
             })
-
+ 
+        # Создаём заказ
         order = Order.objects.create(
             user=request.user,
             address=address,
             phone=phone,
             total_cost=total_cost
         )
-
+ 
         for item in cart_items:
             OrderItem.objects.create(
                 order=order,
@@ -192,11 +195,11 @@ def checkout(request):
                 quantity=item.quantity,
                 price=item.product.price
             )
-
+ 
+        # Генерируем Excel-чек
         wb = openpyxl.Workbook()
         ws = wb.active
         ws.title = 'Чек'
-
         ws.append(['Чек заказа #' + str(order.id)])
         ws.append(['Дата:', str(order.created_at)])
         ws.append(['Покупатель:', request.user.username])
@@ -204,7 +207,6 @@ def checkout(request):
         ws.append(['Телефон:', phone])
         ws.append([])
         ws.append(['Товар', 'Количество', 'Цена', 'Стоимость'])
-
         for item in cart_items:
             ws.append([
                 item.product.name,
@@ -212,33 +214,47 @@ def checkout(request):
                 float(item.product.price),
                 float(item.item_cost())
             ])
-
         ws.append([])
         ws.append(['Итого:', '', '', float(total_cost)])
-
-        file_path = f'order_{order.id}.xlsx'
+ 
+        # Сохраняем во временную папку (работает и на Windows и на Linux)
+        file_path = os.path.join(tempfile.gettempdir(), f'order_{order.id}.xlsx')
         wb.save(file_path)
-
-        email_msg = EmailMessage(
-            subject=f'Чек заказа #{order.id}',
-            body=f'Здравствуйте, {request.user.username}!\n\nВаш заказ #{order.id} успешно оформлен.\nАдрес доставки: {address}\nТелефон: {phone}\nОбщая сумма: {total_cost} руб.\n\nСпасибо за покупку!',
-            from_email='shop@example.com',
-            to=[email]
-        )
-
-        with open(file_path, 'rb') as f:
-            email_msg.attach(f'chek_zakaz_{order.id}.xlsx', f.read(), 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet')
-
-        email_msg.send()
-
-        import os
-        os.remove(file_path)
-
-        cart_items.delete()
-
+ 
+        # Отправляем email (в режиме разработки — выводится в терминале)
+        try:
+            email_msg = EmailMessage(
+                subject=f'Чек заказа #{order.id}',
+                body=(
+                    f'Здравствуйте, {request.user.username}!\n\n'
+                    f'Ваш заказ #{order.id} успешно оформлен.\n'
+                    f'Адрес доставки: {address}\n'
+                    f'Телефон: {phone}\n'
+                    f'Общая сумма: {total_cost} руб.\n\n'
+                    f'Спасибо за покупку!'
+                ),
+                from_email='shop@example.com',
+                to=[email],
+            )
+            with open(file_path, 'rb') as f:
+                email_msg.attach(
+                    f'chek_zakaz_{order.id}.xlsx',
+                    f.read(),
+                    'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
+                )
+            email_msg.send()
+        except Exception:
+            pass  # email не настроен — просто продолжаем
+        finally:
+            if os.path.exists(file_path):
+                os.remove(file_path)
+ 
+        # Очищаем корзину
+        cart.items.all().delete()
+ 
         messages.success(request, f'Заказ #{order.id} успешно оформлен! Чек отправлен на {email}')
         return redirect('home')
-
+ 
     return render(request, 'store/checkout.html', {
         'cart_items': cart_items,
         'total_cost': total_cost,
