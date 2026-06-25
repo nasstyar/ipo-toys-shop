@@ -249,7 +249,7 @@ def checkout(request):
 from rest_framework import viewsets, permissions, status
 from rest_framework.decorators import action
 from rest_framework.response import Response
-from .serializers import (
+from .serializers import OrderSerializer, (
     CategorySerializer, ManufacturerSerializer, ProductSerializer,
     CartSerializer, CartItemSerializer
 )
@@ -329,7 +329,7 @@ from rest_framework.permissions import IsAuthenticated, IsAdminUser, AllowAny
 from rest_framework.response import Response
 from rest_framework import status
 from django.contrib.auth import authenticate, login, logout
-from .serializers import ProfileSerializer, UserRegisterSerializer, UserLoginSerializer
+from .serializers import OrderSerializer, ProfileSerializer, UserRegisterSerializer, UserLoginSerializer
 
 class MeView(APIView):
     permission_classes = [IsAuthenticated]
