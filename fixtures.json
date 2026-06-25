@@ -1,0 +1,331 @@
+[
+{
+  "model": "store.category",
+  "pk": 4,
+  "fields": {
+    "name": "Настольные игры",
+    "description": "Игры для семьи"
+  }
+},
+{
+  "model": "store.category",
+  "pk": 5,
+  "fields": {
+    "name": "Плюшевые игрушки",
+    "description": "Мягкие игрушки"
+  }
+},
+{
+  "model": "store.category",
+  "pk": 6,
+  "fields": {
+    "name": "Развивающие игрушки",
+    "description": "Для дошкольников"
+  }
+},
+{
+  "model": "store.category",
+  "pk": 7,
+  "fields": {
+    "name": "Фигурки",
+    "description": "Playmobil и другие"
+  }
+},
+{
+  "model": "store.category",
+  "pk": 8,
+  "fields": {
+    "name": "Оружие",
+    "description": "Игрушечное оружие"
+  }
+},
+{
+  "model": "store.category",
+  "pk": 9,
+  "fields": {
+    "name": "Творчество",
+    "description": "Наборы для творчества"
+  }
+},
+{
+  "model": "store.category",
+  "pk": 10,
+  "fields": {
+    "name": "Для малышей",
+    "description": "Игрушки 0-3 года"
+  }
+},
+{
+  "model": "store.category",
+  "pk": 12,
+  "fields": {
+    "name": "Конструкторы",
+    "description": "LEGO и аналоги"
+  }
+},
+{
+  "model": "store.category",
+  "pk": 13,
+  "fields": {
+    "name": "Куклы",
+    "description": "Куклы и аксессуары"
+  }
+},
+{
+  "model": "store.category",
+  "pk": 14,
+  "fields": {
+    "name": "Машинки",
+    "description": "Игрушечные автомобили"
+  }
+},
+{
+  "model": "store.manufacturer",
+  "pk": 1,
+  "fields": {
+    "name": "LEGO",
+    "country": "Дания",
+    "description": "Конструкторы"
+  }
+},
+{
+  "model": "store.manufacturer",
+  "pk": 2,
+  "fields": {
+    "name": "Mattel",
+    "country": "США",
+    "description": "Игрушки Barbie"
+  }
+},
+{
+  "model": "store.manufacturer",
+  "pk": 3,
+  "fields": {
+    "name": "Hasbro",
+    "country": "США",
+    "description": "Игрушки и игры"
+  }
+},
+{
+  "model": "store.manufacturer",
+  "pk": 4,
+  "fields": {
+    "name": "Playmobil",
+    "country": "Германия",
+    "description": "Фигурки"
+  }
+},
+{
+  "model": "store.manufacturer",
+  "pk": 5,
+  "fields": {
+    "name": "Fisher-Price",
+    "country": "США",
+    "description": "Игрушки для малышей"
+  }
+},
+{
+  "model": "store.manufacturer",
+  "pk": 6,
+  "fields": {
+    "name": "LEGO",
+    "country": "Дания",
+    "description": "Известный бренд"
+  }
+},
+{
+  "model": "store.product",
+  "pk": 5,
+  "fields": {
+    "name": "Monopoly Классическая",
+    "description": "Настольная игра",
+    "photo": "",
+    "price": "29.99",
+    "stock_quantity": 20,
+    "category": 4,
+    "manufacturer": 3
+  }
+},
+{
+  "model": "store.product",
+  "pk": 6,
+  "fields": {
+    "name": "Плюшевый мишка",
+    "description": "Большой медведь 50см",
+    "photo": "",
+    "price": "39.99",
+    "stock_quantity": 18,
+    "category": 5,
+    "manufacturer": 5
+  }
+},
+{
+  "model": "store.product",
+  "pk": 9,
+  "fields": {
+    "name": "Playmobil Замок",
+    "description": "Средневековый замок",
+    "photo": "",
+    "price": "89.99",
+    "stock_quantity": 8,
+    "category": 7,
+    "manufacturer": 4
+  }
+},
+{
+  "model": "store.product",
+  "pk": 14,
+  "fields": {
+    "name": "Мяч футбольный",
+    "description": "Детский футбольный мяч",
+    "photo": "",
+    "price": "14.99",
+    "stock_quantity": 50,
+    "category": 8,
+    "manufacturer": 5
+  }
+},
+{
+  "model": "store.product",
+  "pk": 15,
+  "fields": {
+    "name": "Пазл 1000 деталей",
+    "description": "Большой пазл",
+    "photo": "",
+    "price": "16.99",
+    "stock_quantity": 35,
+    "category": 9,
+    "manufacturer": 5
+  }
+},
+{
+  "model": "store.product",
+  "pk": 18,
+  "fields": {
+    "name": "Playmobil Ферма",
+    "description": "Набор фермы",
+    "photo": "",
+    "price": "69.99",
+    "stock_quantity": 11,
+    "category": 7,
+    "manufacturer": 4
+  }
+},
+{
+  "model": "store.product",
+  "pk": 19,
+  "fields": {
+    "name": "Конструктор магнитный",
+    "description": "Magformers 50 деталей",
+    "photo": "",
+    "price": "54.99",
+    "stock_quantity": 16,
+    "category": 6,
+    "manufacturer": 5
+  }
+},
+{
+  "model": "store.product",
+  "pk": 20,
+  "fields": {
+    "name": "Мягкая игрушка заяц",
+    "description": "Плюшевый заяц",
+    "photo": "",
+    "price": "24.99",
+    "stock_quantity": 30,
+    "category": 5,
+    "manufacturer": 5
+  }
+},
+{
+  "model": "store.product",
+  "pk": 21,
+  "fields": {
+    "name": "LEGO Duplo Паровоз",
+    "description": "Для малышей",
+    "photo": "",
+    "price": "44.99",
+    "stock_quantity": 20,
+    "category": 10,
+    "manufacturer": 5
+  }
+},
+{
+  "model": "store.product",
+  "pk": 24,
+  "fields": {
+    "name": "Настольная игра Уно",
+    "description": "Карточная игра",
+    "photo": "",
+    "price": "12.99",
+    "stock_quantity": 60,
+    "category": 4,
+    "manufacturer": 3
+  }
+},
+{
+  "model": "store.product",
+  "pk": 27,
+  "fields": {
+    "name": "Playmobil Полиция",
+    "description": "Полицейский участок",
+    "photo": "",
+    "price": "54.99",
+    "stock_quantity": 10,
+    "category": 7,
+    "manufacturer": 4
+  }
+},
+{
+  "model": "store.product",
+  "pk": 28,
+  "fields": {
+    "name": "Конструктор деревянный",
+    "description": "Деревянные кубики",
+    "photo": "",
+    "price": "27.99",
+    "stock_quantity": 25,
+    "category": 6,
+    "manufacturer": 5
+  }
+},
+{
+  "model": "store.product",
+  "pk": 29,
+  "fields": {
+    "name": "Плюшевый единорог",
+    "description": "Радужный единорог",
+    "photo": "",
+    "price": "32.99",
+    "stock_quantity": 20,
+    "category": 5,
+    "manufacturer": 5
+  }
+},
+{
+  "model": "store.product",
+  "pk": 33,
+  "fields": {
+    "name": "Настольная игра Джанга",
+    "description": "Башня из брусочков",
+    "photo": "",
+    "price": "18.99",
+    "stock_quantity": 33,
+    "category": 4,
+    "manufacturer": 3
+  }
+},
+{
+  "model": "store.product",
+  "pk": 34,
+  "fields": {
+    "name": "Playmobil Пираты",
+    "description": "Пиратский корабль",
+    "photo": "",
+    "price": "79.99",
+    "stock_quantity": 9,
+    "category": 7,
+    "manufacturer": 4
+  }
+}
+]
