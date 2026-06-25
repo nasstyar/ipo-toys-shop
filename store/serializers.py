@@ -77,12 +77,25 @@ from .models import Profile
 
 class ProfileSerializer(serializers.ModelSerializer):
     username = serializers.CharField(source='user.username', read_only=True)
-    email = serializers.EmailField(source='user.email')
+    email = serializers.EmailField(source='user.email', required=False)
 
     class Meta:
         model = Profile
         fields = ['id', 'username', 'email', 'full_name', 'phone', 'address', 'delivery_city', 'postal_code', 'favorite_category', 'newsletter', 'role', 'avatar']
         read_only_fields = ['username', 'role']
+
+    def update(self, instance, validated_data):
+        user_data = validated_data.pop('user', {})
+        if 'email' in user_data:
+            instance.user.email = user_data['email']
+            instance.user.save()
+        for field in ['full_name', 'phone', 'address', 'delivery_city', 'postal_code', 'newsletter']:
+            if field in validated_data:
+                setattr(instance, field, validated_data[field])
+        if 'favorite_category' in validated_data:
+            instance.favorite_category = validated_data['favorite_category']
+        instance.save()
+        return instance
 
 class UserRegisterSerializer(serializers.ModelSerializer):
     password = serializers.CharField(write_only=True, min_length=6)
