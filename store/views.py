@@ -394,3 +394,11 @@ def profile_view(request):
 
 def settings_view(request):
     return render(request, 'store/settings.html')
+
+
+class OrderViewSet(viewsets.ReadOnlyModelViewSet):
+    serializer_class = OrderSerializer
+    permission_classes = [IsAuthenticated]
+    
+    def get_queryset(self):
+        return Order.objects.filter(user=self.request.user).order_by('-created_at')

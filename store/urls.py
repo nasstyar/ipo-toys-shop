@@ -11,6 +11,7 @@ router.register(r'manufacturers', views.ManufacturerViewSet, basename='manufactu
 router.register(r'products', views.ProductViewSet, basename='product')
 router.register(r'carts', views.CartViewSet, basename='cart')
 router.register(r'cart-items', views.CartItemViewSet, basename='cartitem')
+router.register(r'orders', views.OrderViewSet, basename='order')
 
 # URL-паттерны
 urlpatterns = [
