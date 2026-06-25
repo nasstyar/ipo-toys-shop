@@ -32,6 +32,11 @@ ALLOWED_HOSTS = config('ALLOWED_HOSTS', default='localhost,127.0.0.1,web-product
 # Разрешаем все поддомены railway
 ALLOWED_HOSTS.append('.up.railway.app')
 
+# CSRF trusted origins для Railway
+CSRF_TRUSTED_ORIGINS = [
+    'https://web-production-90ff6.up.railway.app',
+    'https://*.up.railway.app',
+]
 
 # Application definition
 
