@@ -1,16 +1,67 @@
-<!DOCTYPE html>
-<html>
-<head>
-    <title>Вход</title>
-</head>
-<body>
-    <h1>Вход в систему</h1>
-    <form method="post">
-        {% csrf_token %}
-        {{ form.as_p }}
-        <button type="submit">Войти</button>
-    </form>
-    <p>Нет аккаунта? <a href="{% url 'register' %}">Зарегистрироваться</a></p>
-    <p><a href="/">На главную</a></p>
-</body>
-</html>
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Вход - Магазин игрушек{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+    <div class="row justify-content-center">
+        <div class="col-md-6 col-lg-5">
+            <div class="card shadow-lg border-0" style="border-radius: 20px;">
+                <div class="card-body p-5">
+                    <div class="text-center mb-4">
+                        <div style="font-size: 3rem;">🧸</div>
+                        <h2 class="fw-bold" style="color: #d63384;">Вход в систему</h2>
+                        <p class="text-muted">Добро пожаловать в магазин игрушек</p>
+                    </div>
+
+                    {% if form.errors %}
+                        <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                            <strong>Ошибка!</strong> Неверное имя пользователя или пароль.
+                            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                        </div>
+                    {% endif %}
+
+                    <form method="post" action="{% url 'login' %}">
+                        {% csrf_token %}
+                        
+                        <div class="mb-3">
+                            <label for="id_username" class="form-label fw-semibold">
+                                <i class="bi bi-person"></i> Имя пользователя
+                            </label>
+                            <input type="text" name="username" id="id_username" 
+                                   class="form-control form-control-lg" 
+                                   placeholder="Введите имя пользователя"
+                                   required autofocus>
+                        </div>
+
+                        <div class="mb-4">
+                            <label for="id_password" class="form-label fw-semibold">
+                                <i class="bi bi-lock"></i> Пароль
+                            </label>
+                            <input type="password" name="password" id="id_password" 
+                                   class="form-control form-control-lg" 
+                                   placeholder="Введите пароль"
+                                   required>
+                        </div>
+
+                        <button type="submit" class="btn btn-lg w-100 text-white fw-bold" 
+                                style="background: linear-gradient(135deg, #ff6b9d 0%, #d63384 100%); border: none; border-radius: 12px;">
+                            <i class="bi bi-box-arrow-in-right"></i> Войти
+                        </button>
+                    </form>
+
+                    <div class="text-center mt-4">
+                        <p class="text-muted mb-0">
+                            Нет аккаунта? 
+                            <a href="{% url 'register' %}" class="fw-bold" style="color: #d63384; text-decoration: none;">
+                                Зарегистрироваться
+                            </a>
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
