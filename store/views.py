@@ -390,7 +390,9 @@ class LogoutView(APIView):
         return Response({'message': 'Выход выполнен'})
 
 def profile_view(request):
-    return render(request, 'store/profile.html')
+    from .models import Category
+    categories = Category.objects.all()
+    return render(request, 'store/profile.html', {'categories': categories})
 
 
 def settings_view(request):
